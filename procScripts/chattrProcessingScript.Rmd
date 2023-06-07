@@ -1,0 +1,89 @@
+---
+title: "chattrScript"
+author: "Katiana Estrada"
+output: html_document
+date: "2023-06-01"
+---
+
+```{r chunk1, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+## clear environment
+rm(list = ls())
+```
+
+Load in necessary libraries and chattr scripts
+
+```{r chunk2, include=TRUE}
+## install rlena package from GitHub - needed first time you run code
+#devtools::install_github("HomeBankCode/rlena", dependencies = TRUE)
+
+## load packages
+library("rlena")
+library("readxl")
+library("writexl")
+library("tidyverse")
+
+## load in functions from base chattr scripts
+source("chattrScripts/tabularize-data.R")
+source("chattrScripts/transition-detectors.R") 
+source("chattrScripts/chattr-helpers.R")
+source("chattrScripts/continuation-detectors.R")
+source("chattrScripts/intseq-detectors.R")
+source("chattrScripts/estimate-baseline.R")
+source("chattrScripts/fetch-chattr-info.R")
+source("chattrScripts/make-summaries.R") 
+```
+
+## Convert .its File to .txt File Using rlena Package
+
+```{r chunk3, include=TRUE}
+## reads in first .its file 
+sampIts <- read_its_file("Data/its Files/FXS/20190819_210318_025481_2.its")
+
+## gathers all vocalizations
+segments <- gather_segments(sampIts)
+
+## select subet of segments needed for chattr scripts
+segments <- segments[,c("spkr", "startTime", "endTime")]
+
+## rename columns for chattr script to run properly
+segments <- segments %>%
+  rename(speaker = spkr) %>%
+  rename(start.ms = startTime) %>%
+  rename(stop.ms = endTime)
+
+## convert s to ms for chattr script to run properly
+segments$start.ms <- 1000 * (segments$start.ms)
+segments$stop.ms <- 1000 * (segments$stop.ms)
+
+## save .txt file into Data folder
+write.table(segments, file = "Data/txt Files/FXS/20190819_210318_025481_2.txt", sep = "\t", 
+            row.names = FALSE, col.names = FALSE)
+```
+
+## chattr Processing
+
+fetch_chatter_BST --> function for tabular format data; needs .txt file in "expected format" specified on GitHub page
+fetch_chatter_LENA --> function for .its files 
+target.ptcp --> target participant - set to child wearing recorder "CHN"
+interactants --> caregivers, specifically male adult near (MAN) and female adult near (FAN) - "^[MF]AN"
+allowed.gap --> the maximum amount of time, in milliseconds, that is allowed to pass during a speaker transition - set to 5000ms
+
+```{r chunk4, include=TRUE}
+## loads in .its file and calculates turn transitions between target participant and specified interactants
+sampFetch <- fetch_chatter_BST("Data/txt Files/FXS/20190819_210318_025481_2.txt", 
+                                target.ptcp = "CHN", interactants = "^[MF]AN",
+                               allowed.gap = 5000)
+
+## pulls table that contains the detailed turn taking data detected by chattr, including both turn transitions and interactional sequences
+sampOut <- sampFetch$real.tt.vals
+
+## create column with participant .its file name for later merging with assessmentID
+sampOut['its File']='20190819_210318_025481_2.its'
+
+## save chattr .xlsx file
+write_xlsx(sampOut, "Data/chattr Output/chattr_output_05_31_23.xlsx")
+```
+
+

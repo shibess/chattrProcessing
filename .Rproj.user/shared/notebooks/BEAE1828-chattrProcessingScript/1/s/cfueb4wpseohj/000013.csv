@@ -1,0 +1,15 @@
+"0","## install rlena package from GitHub - needed first time you run code"
+"0","#devtools::install_github(""HomeBankCode/rlena"", dependencies = TRUE)"
+"0",""
+"0","## load packages"
+"0","library(""rlena"")"
+"0","library(""readxl"")"
+"0","library(""writexl"")"
+"0","library(""tidyverse"")"
+"0",""
+"0","## load in functions from base chattr scripts"
+"0","source(""chattrScripts/tabularize-data.R"")"
+"2","Warning: cannot open file 'chattrScripts/tabularize-data.R': No such file or directory"
+"2","Error in file(filename, ""r"", encoding = encoding) : 
+  cannot open the connection
+"
