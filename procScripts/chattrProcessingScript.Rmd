@@ -25,21 +25,23 @@ library("writexl")
 library("tidyverse")
 
 ## load in functions from base chattr scripts
-source("chattrScripts/tabularize-data.R")
-source("chattrScripts/transition-detectors.R") 
-source("chattrScripts/chattr-helpers.R")
-source("chattrScripts/continuation-detectors.R")
-source("chattrScripts/intseq-detectors.R")
-source("chattrScripts/estimate-baseline.R")
-source("chattrScripts/fetch-chattr-info.R")
-source("chattrScripts/make-summaries.R") 
+source("/Users/dominic/Desktop/ISL/chattrProcessing/chattrScripts/chattr-helpers.R")
+source("/Users/dominic/Desktop/ISL/chattrProcessing/chattrScripts/continuation-detectors.R") 
+source("/Users/dominic/Desktop/ISL/chattrProcessing/chattrScripts/estimate-baseline.R")
+source("/Users/dominic/Desktop/ISL/chattrProcessing/chattrScripts/fetch-chattr-info.R")
+source("/Users/dominic/Desktop/ISL/chattrProcessing/chattrScripts/intseq-detectors.R")
+source("/Users/dominic/Desktop/ISL/chattrProcessing/chattrScripts/make-summaries.R")
+source("/Users/dominic/Desktop/ISL/chattrProcessing/chattrScripts/tabularize-data.R") 
+source("/Users/dominic/Desktop/ISL/chattrProcessing/chattrScripts/transition-detectors.R")
 ```
 
 ## Convert .its File to .txt File Using rlena Package
 
 ```{r chunk3, include=TRUE}
 ## reads in first .its file 
-sampIts <- read_its_file("Data/its Files/FXS/20190819_210318_025481_2.its")
+files <- list.files(path="/Users/dominic/Desktop/ISL/chattrProcessing/Data/current", pattern="*.its", full.names=TRUE, recursive=FALSE)
+for (x in files) {
+sampIts <- read_its_file(x)
 
 ## gathers all vocalizations
 segments <- gather_segments(sampIts)
@@ -58,8 +60,9 @@ segments$start.ms <- 1000 * (segments$start.ms)
 segments$stop.ms <- 1000 * (segments$stop.ms)
 
 ## save .txt file into Data folder
-write.table(segments, file = "Data/txt Files/FXS/20190819_210318_025481_2.txt", sep = "\t", 
+write.table(segments, file = "/Users/dominic/Desktop/ISL/chattrProcessing/Data/txt Files/Racheltxt/rachel.txt", sep = "\t", 
             row.names = FALSE, col.names = FALSE)
+}
 ```
 
 ## chattr Processing
@@ -72,7 +75,7 @@ allowed.gap --> the maximum amount of time, in milliseconds, that is allowed to 
 
 ```{r chunk4, include=TRUE}
 ## loads in .its file and calculates turn transitions between target participant and specified interactants
-sampFetch <- fetch_chatter_BST("Data/txt Files/FXS/20190819_210318_025481_2.txt", 
+sampFetch <- fetch_chatter_BST("/Users/dominic/Desktop/ISL/chattrProcessing/Data/txt Files/FXS/20190819_210318_025481_2.txt", 
                                 target.ptcp = "CHN", interactants = "^[MF]AN",
                                allowed.gap = 5000)
 
@@ -83,7 +86,7 @@ sampOut <- sampFetch$real.tt.vals
 sampOut['its File']='20190819_210318_025481_2.its'
 
 ## save chattr .xlsx file
-write_xlsx(sampOut, "Data/chattr Output/chattr_output_05_31_23.xlsx")
+write_xlsx(sampOut, "/Users/dominic/Desktop/ISL/chattrProcessing/Data/chattr Output/chattr_output_05_31_23.xlsx")
 ```
 
 
